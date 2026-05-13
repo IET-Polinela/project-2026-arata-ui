@@ -83,11 +83,11 @@ WSGI_APPLICATION = 'iet_2026_24782081.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'smartcity_db',  # Nama database di PostgreSQL
-        'USER': 'postgres',  # Username PostgreSQL, ganti jika diperlukan
-        'PASSWORD': 'password123',  # Password untuk username PostgreSQL
-        'HOST': 'localhost',  # Pastikan PostgreSQL berjalan di localhost
-        'PORT': '5432',  
+        'NAME': 'smartcity_db',
+        'USER': 'postgres',        
+        'PASSWORD': '123', 
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 
