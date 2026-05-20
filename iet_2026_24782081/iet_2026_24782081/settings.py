@@ -58,14 +58,13 @@ ROOT_URLCONF = 'iet_2026_24782081.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [
-            os.path.join(BASE_DIR, 'main_app/templates'),
-            os.path.join(BASE_DIR, 'about/templates'),
-            os.path.join(BASE_DIR, 'contacts/templates'),
-        ],
+        # Ubah bagian DIRS ini agar membaca folder templates global kita
+        # Pastikan path menjadi string agar kompatibel dengan semua loader
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
