@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %}Daftar Laporan Permasalahan Kota - Smart City{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">📋 Dasbor Manajemen Laporan</h2>
+            <p class="text-muted mb-0">Pantau, verifikasi, dan kelola semua aduan infrastruktur serta layanan kota.</p>
+        </div>
+        <a href="{% url 'add_report' %}" class="btn btn-primary fw-bold shadow-sm px-4 py-2">
+            ➕ Tambah Laporan Baru
+        </a>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{% if message.tags == 'error' %}danger{% elif message.tags == 'info' %}primary{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show shadow-sm" role="alert">
+                {{ message }}
+                <button type="submit" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th class="py-3 px-4" style="width: 5%;">No</th>
+                            <th class="py-3" style="width: 30%;">Judul Permasalahan</th>
+                            <th class="py-3" style="width: 15%;">Kategori</th>
+                            <th class="py-3" style="width: 20%;">Lokasi</th>
+                            <th class="py-3" style="width: 15%;">Status</th>
+                            <th class="py-3 text-center" style="width: 15%;">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for report in reports %}
+                            <tr>
+                                <td class="px-4 fw-bold text-secondary">{{ forloop.counter }}</td>
+                                <td>
+                                    <span class="fw-bold text-dark d-block">{{ report.title }}</span>
+                                    <small class="text-muted d-block" style="font-size: 0.75rem;">ID: #{{ report.pk }}</small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border px-2.5 py-1.5">{{ report.category }}</span>
+                                </td>
+                                <td class="text-truncate" style="max-width: 200px;">
+                                    <i class="bi bi-geo-alt-fill text-danger me-1"></i>{{ report.location }}
+                                </td>
+                                <td>
+                                    {% if report.status == 'Reported' %}
+                                        <span class="badge bg-warning text-dark px-3 py-2 fw-semibold">⚠️ Reported</span>
+                                    {% elif report.status == 'Verified' %}
+                                        <span class="badge bg-info text-white px-3 py-2 fw-semibold">🔍 Verified</span>
+                                    {% elif report.status == 'Resolved' %}
+                                        <span class="badge bg-success text-white px-3 py-2 fw-semibold">✅ Resolved</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary text-white px-3 py-2 fw-semibold">{{ report.status }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    <div class="d-inline-flex gap-1">
+                                        <a href="{% url 'report_detail' report.pk %}" class="btn btn-sm btn-outline-dark fw-medium px-2.5">
+                                            Lihat Detail
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center py-5 my-4">
+                                    <div class="py-4">
+                                        <div class="display-1 text-muted mb-3" style="user-select: none;">📭</div>
+                                        <h4 class="fw-bold text-secondary mb-2">Belum Ada Laporan Masuk</h4>
+                                        <p class="text-muted mx-auto mb-4" style="max-width: 450px; font-size: 0.95rem;">
+                                            Sistem pengawasan kota berjalan dengan normal. Saat ini tidak ada antrean berkas aduan dari warga di basis data.
+                                        </p>
+                                        <a href="{% url 'add_report' %}" class="btn btn-primary px-4 fw-bold shadow-sm btn-sm">
+                                            ➕ Tulis Laporan Pertama Sekarang
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

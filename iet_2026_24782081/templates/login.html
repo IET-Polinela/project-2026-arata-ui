@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}Masuk ke Sistem - Smart City{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center align-items-center" style="min-height: 70vh;">
+    <div class="col-md-5">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-dark text-white py-3 text-center">
+                <h4 class="mb-0 fw-bold">🔐 Login Portal Arata UI</h4>
+            </div>
+            <div class="card-body p-4">
+                <form id="realLoginForm">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-secondary">Username / NPM</label>
+                        <input type="text" class="form-control form-control-lg" value="24782081" required readonly>
+                        <div class="form-text text-muted">NPM kamu otomatis terisi sebagai identitas praktikum.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-secondary">Password</label>
+                        <input type="password" class="form-control form-control-lg" value="password123" required readonly>
+                    </div>
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary fw-bold py-2.5 shadow-sm">Masuk Sekarang</button>
+                        <a href="{% url 'report_list' %}" class="btn btn-outline-secondary py-2.5">Kembali ke Dashboard</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Logika ketika tombol Masuk Sekarang di halaman login ini diklik
+    document.getElementById('realLoginForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        localStorage.setItem('isLoggedIn', 'true');
+        // Pindah ke halaman utama dan bawa parameter status login sukses
+        window.location.href = "{% url 'report_list' %}?login_success=true";
+    });
+</script>
+{% endblock %}

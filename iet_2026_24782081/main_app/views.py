@@ -1,60 +1,69 @@
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
-from django.views import View
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
-from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib import messages
-from .models import Report
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, View, TemplateView
+from .models import Report  
+from .forms import ReportForm  
 
-# 1. Tampilan Daftar Laporan
+# 1. Halaman Dashboard Utama (Membaca templates/report_list.html)
 class ReportListView(ListView):
     model = Report
-    template_name = 'main_app/home.html'
+    template_name = 'report_list.html'  
     context_object_name = 'reports'
-    ordering = ['-created_at']
 
-# 2. Detail Laporan
+# 2. Halaman Detail Laporan (Membaca templates/report_detail.html)
 class ReportDetailView(DetailView):
     model = Report
-    template_name = 'main_app/report_detail.html'
-    context_object_name = 'report'
+    template_name = 'report_detail.html'
 
-# 3. Tambah Laporan Baru (Menggunakan SuccessMessageMixin untuk Feedback)
-class ReportCreateView(SuccessMessageMixin, CreateView):
+# 3. Halaman Tambah Laporan Baru (Membaca templates/report_form.html)
+class ReportCreateView(CreateView):
     model = Report
-    fields = ['title', 'category', 'description', 'location']
-    template_name = 'main_app/add_report.html'
+    form_class = ReportForm
+    template_name = 'report_form.html'
     success_url = reverse_lazy('report_list')
-    success_message = "Laporan baru berhasil ditambahkan ke dalam sistem!" # Notifikasi sukses
 
-# 4. Edit Laporan (Menggunakan SuccessMessageMixin)
-class ReportUpdateView(SuccessMessageMixin, UpdateView):
+    def form_valid(self, form):
+        messages.success(self.request, "Laporan baru berhasil ditambahkan ke dalam sistem!")
+        return super().form_valid(form)
+
+# 4. Halaman Edit Laporan (Membaca templates/report_form.html)
+class ReportUpdateView(UpdateView):
     model = Report
-    fields = ['title', 'category', 'description', 'location']
-    template_name = 'main_app/add_report.html'
+    form_class = ReportForm
+    template_name = 'report_form.html'
     success_url = reverse_lazy('report_list')
-    success_message = "Data laporan berhasil diperbarui!"
 
-# 5. Hapus Laporan
+    def form_valid(self, form):
+        messages.success(self.request, "Data laporan berhasil diperbarui!")
+        return super().form_valid(form)
+
+# 5. Halaman Konfirmasi Hapus (Membaca templates/report_confirm_delete.html)
 class ReportDeleteView(DeleteView):
     model = Report
-    template_name = 'main_app/report_confirm_delete.html'
+    template_name = 'report_confirm_delete.html'
     success_url = reverse_lazy('report_list')
-    
-    # Custom method untuk memunculkan pesan setelah berhasil menghapus
+
     def delete(self, request, *args, **kwargs):
-        # Gunakan messages.success (tidak ada messages.danger di Django)
-        messages.success(self.request, "Laporan telah berhasil dihapus dari sistem.")
+        messages.error(self.request, "Data laporan telah berhasil dihapus dari sistem.")
         return super().delete(request, *args, **kwargs)
 
-# 6. Alur Kerja Perubahan Status Workflow dengan Pesan Info
+# 6. Alur Kerja Perubahan Status / Workflow Tombol
 class ReportUpdateStatusView(View):
     def post(self, request, pk):
         report = get_object_or_404(Report, pk=pk)
-        old_status = report.status
-        new_status = request.POST.get('status')
-        report.status = new_status
-        report.save()
+        action = request.POST.get('action')
         
-        messages.info(request, f"Status laporan '{report.title}' berhasil diubah menjadi {new_status}.")
+        if action == 'verify' and report.status == 'Reported':
+            report.status = 'Verified'
+            messages.info(request, f"Status laporan '{report.title}' kini diubah menjadi Verified.")
+        elif action == 'resolve' and report.status == 'Verified':
+            report.status = 'Resolved'
+            messages.success(request, f"Status laporan '{report.title}' kini diubah menjadi Resolved.")
+        
+        report.save()
         return redirect('report_list')
+
+# 7. Tampilan Halaman Login Mandiri (Membaca templates/login.html)
+class CustomLoginView(TemplateView):
+    template_name = 'login.html'
