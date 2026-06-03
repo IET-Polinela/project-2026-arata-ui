@@ -1,42 +1,31 @@
 {% extends 'base.html' %}
-
-{% block title %}Masuk ke Sistem - Smart City{% endblock %}
-
+{% block title %}Masuk Aplikasi - Smart City{% endblock %}
 {% block content %}
 <div class="row justify-content-center align-items-center" style="min-height: 70vh;">
     <div class="col-md-5">
-        <div class="card shadow-sm border-0">
-            <div class="card-header bg-dark text-white py-3 text-center">
-                <h4 class="mb-0 fw-bold">🔐 Login Portal Arata UI</h4>
+        <div class="card shadow border-0">
+            <div class="card-header bg-dark text-white text-center py-4">
+                <h3 class="mb-1 fw-bold">🔑 Masuk Aplikasi</h3>
+                <p class="text-white-50 small mb-0">Portal Manajemen Permasalahan Kota Smart City</p>
             </div>
             <div class="card-body p-4">
-                <form id="realLoginForm">
+                {% if form.errors %}
+                    <div class="alert alert-danger">Username atau password salah!</div>
+                {% endif %}
+                <form method="POST" class="needs-validation" novalidate>
+                    {% csrf_token %}
                     <div class="mb-3">
-                        <label class="form-label fw-semibold text-secondary">Username / NPM</label>
-                        <input type="text" class="form-control form-control-lg" value="24782081" required readonly>
-                        <div class="form-text text-muted">NPM kamu otomatis terisi sebagai identitas praktikum.</div>
+                        <label for="id_username" class="form-label fw-semibold text-secondary">Username</label>
+                        <input type="text" name="username" id="id_username" class="form-control" placeholder="Masukkan username" required>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold text-secondary">Password</label>
-                        <input type="password" class="form-control form-control-lg" value="password123" required readonly>
+                    <div class="mb-4">
+                        <label for="id_password" class="form-label fw-semibold text-secondary">Password</label>
+                        <input type="password" name="password" id="id_password" class="form-control" placeholder="Masukkan password" required>
                     </div>
-                    <div class="d-grid gap-2 mt-4">
-                        <button type="submit" class="btn btn-primary fw-bold py-2.5 shadow-sm">Masuk Sekarang</button>
-                        <a href="{% url 'report_list' %}" class="btn btn-outline-secondary py-2.5">Kembali ke Dashboard</a>
-                    </div>
+                    <button type="submit" class="btn btn-dark w-100 py-2 fw-bold shadow-sm">Masuk Sekarang</button>
                 </form>
             </div>
         </div>
     </div>
 </div>
-
-<script>
-    // Logika ketika tombol Masuk Sekarang di halaman login ini diklik
-    document.getElementById('realLoginForm').addEventListener('submit', function(event) {
-        event.preventDefault();
-        localStorage.setItem('isLoggedIn', 'true');
-        // Pindah ke halaman utama dan bawa parameter status login sukses
-        window.location.href = "{% url 'report_list' %}?login_success=true";
-    });
-</script>
 {% endblock %}

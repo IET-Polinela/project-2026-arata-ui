@@ -23,6 +23,18 @@ class ReportCreateView(CreateView):
     template_name = 'report_form.html'
     success_url = reverse_lazy('report_list')
 
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect('custom_login')
+        
+        # PENGATURAN LOGIKA YANG BENAR:
+        # Jika user yang masuk BUKAN admin DAN BUKAN superuser, maka akses ditolak!
+        if not (getattr(request.user, 'is_admin', False) or request.user.is_superuser):
+            messages.error(request, "⚠️ Akses Ditolak! Anda bukan pengguna otoritas (Admin).")
+            return redirect('/')
+            
+        return super().dispatch(request, *args, **kwargs)
+
     def form_valid(self, form):
         messages.success(self.request, "Laporan baru berhasil ditambahkan ke dalam sistem!")
         return super().form_valid(form)
@@ -34,6 +46,14 @@ class ReportUpdateView(UpdateView):
     template_name = 'report_form.html'
     success_url = reverse_lazy('report_list')
 
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect('custom_login')
+        if not (getattr(request.user, 'is_admin', False) or request.user.is_superuser):
+            messages.error(request, "⚠️ Akses Ditolak! Anda bukan pengguna otoritas (Admin).")
+            return redirect('/')
+        return super().dispatch(request, *args, **kwargs)
+
     def form_valid(self, form):
         messages.success(self.request, "Data laporan berhasil diperbarui!")
         return super().form_valid(form)
@@ -44,6 +64,14 @@ class ReportDeleteView(DeleteView):
     template_name = 'report_confirm_delete.html'
     success_url = reverse_lazy('report_list')
 
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect('custom_login')
+        if not (getattr(request.user, 'is_admin', False) or request.user.is_superuser):
+            messages.error(request, "⚠️ Akses Ditolak! Anda bukan pengguna otoritas (Admin).")
+            return redirect('/')
+        return super().dispatch(request, *args, **kwargs)
+
     def delete(self, request, *args, **kwargs):
         messages.error(self.request, "Data laporan telah berhasil dihapus dari sistem.")
         return super().delete(request, *args, **kwargs)
@@ -51,6 +79,12 @@ class ReportDeleteView(DeleteView):
 # 6. Alur Kerja Perubahan Status / Workflow Tombol
 class ReportUpdateStatusView(View):
     def post(self, request, pk):
+        if not request.user.is_authenticated:
+            return redirect('custom_login')
+        if not (getattr(request.user, 'is_admin', False) or request.user.is_superuser):
+            messages.error(request, "⚠️ Akses Ditolak! Anda bukan pengguna otoritas (Admin).")
+            return redirect('/')
+
         report = get_object_or_404(Report, pk=pk)
         action = request.POST.get('action')
         
