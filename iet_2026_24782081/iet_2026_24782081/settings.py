@@ -10,7 +10,7 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 # ==============================================================================
-# DAFTAR APLIKASI (INSTALLED APPS) - UTUH & LENGKAP
+# DAFTAR APLIKASI (INSTALLED APPS) - UTUH & LENGKAP DENGAN LAB 7
 # ==============================================================================
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -23,8 +23,11 @@ INSTALLED_APPS = [
     # Aplikasi CRUD Laporan Kota (Lab 5 - Tetap Utuh)
     'main_app',
 
-    # Aplikasi Manajemen User (Lab 6)
+    # Aplikasi Manajemen User (Lab 6 - Tetap Utuh)
     'usermanagement_24782081', 
+
+    # Aplikasi Statistik & AJAX Dashboard Baru (Lab 7)
+    'dashboard_24782081',
 ]
 
 # ==============================================================================
@@ -104,7 +107,7 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # ==============================================================================
-# KONFIGURASI TAMBAHAN LAB 6 (YANG BARU DIMASUKKAN DI PALING BAWAH)
+# KONFIGURASI TAMBAHAN LAB 6 & LAB 7
 # ==============================================================================
 AUTH_USER_MODEL = 'usermanagement_24782081.User'
 

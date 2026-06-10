@@ -1,14 +1,22 @@
+"""
+iet_2026_24782081 URL Configuration
+==============================================================================
+Rute URL Utama - Pembenahan Konflik Jalur Login / HTTP 405 Fix
+==============================================================================
+"""
 from django.contrib import admin
 from django.urls import path, include
-from django.contrib.auth import views as auth_views
 
 urlpatterns = [
+    # 1. Administrasi Django
     path('admin/', admin.site.urls),
-    
-    # Rute Autentikasi Utama (Diprioritaskan di atas)
-    path('login/', auth_views.LoginView.as_view(template_name='login.html'), name='custom_login'),
-    path('logout/', auth_views.LogoutView.as_view(next_page='custom_login'), name='custom_logout'),
-    
-    # Rute Manajemen Laporan Kota
+
+    # 2. Aplikasi Autentikasi didahulukan agar mengeliminasi bentrokan rute kosong ''
+    path('', include('usermanagement_24782081.urls')),
+
+    # 3. Aplikasi Dashboard Statistik (Lab 7)
+    path('dashboard/', include('dashboard_24782081.urls')),
+
+    # 4. Aplikasi CRUD Laporan Warga (Lab 5) diletakkan paling bawah
     path('', include('main_app.urls')),
 ]

@@ -1,0 +1,289 @@
+{% extends 'base.html' %}
+
+{% block title %}Statistik & Visualisasi Data - Smart City{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <div class="row mb-4">
+        <div class="col-12 text-center text-md-start">
+            <h1 class="display-5 fw-bold text-dark mb-1">📊 Real-Time Dashboard</h1>
+            <p class="text-muted">Analisis data pelaporan dan monitoring penanganan fasilitas kota secara transparan.</p>
+            <hr>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <div class="col-md-7">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-dark text-white fw-bold py-3">
+                    📈 Distribusi Jumlah Laporan Berdasarkan Kategori
+                </div>
+                <div class="card-body d-flex align-items-center justify-content-center p-4">
+                    <canvas id="categoryChart" style="max-height: 320px;"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-5">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-dark text-white fw-bold py-3">
+                    📌 Progres & Status Penanganan Masalah
+                </div>
+                <div class="card-body d-flex align-items-center justify-content-center p-4">
+                    <canvas id="statusChart" style="max-height: 320px;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-secondary text-white fw-bold py-3 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+                    <span>🔍 Pencarian Data Laporan Instan (Live Search)</span>
+                    <div class="col-md-4">
+                        <input type="text" id="searchInput" class="form-control form-control-sm" placeholder="Ketik kata kunci (Judul/Kategori/Lokasi)...">
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                        <table class="table table-hover align-middle mb-0 text-nowrap">
+                            <thead class="table-light sticky-top">
+                                <tr>
+                                    <th class="ps-4">Judul Kendala</th>
+                                    <th>Kategori</th>
+                                    <th>Lokasi Wilayah</th>
+                                    <th>Status</th>
+                                    <th class="text-center pe-4">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="searchResultsTable">
+                                <tr>
+                                    <td colspan="5" class="text-center py-4 text-muted">Memuat data pelaporan...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-warning text-dark fw-bold py-3">
+                    ⚠️ 5 Laporan Masuk Terbaru (REPORTED)
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush" id="recentReportedList">
+                        <li class="list-group-item text-center py-3 text-muted">Memuat data...</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-success text-white fw-bold py-3">
+                    ✅ 5 Laporan Terakhir Diselesaikan (RESOLVED)
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush" id="recentResolvedList">
+                        <li class="list-group-item text-center py-3 text-muted">Memuat data...</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="reportDetailModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title fw-bold" id="modalTitle">Detail Informasi Laporan</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <div class="text-center py-3">
+                    <div class="spinner-border text-dark" role="status"></div>
+                    <p class="text-muted mt-2 mb-0">Mengambil detail data...</p>
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary fw-bold" data-bs-dismiss="modal">Tutup Jendela</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // -------------------------------------------------------------
+    // 1. AMBIL DATA STATISTIK DAN GRAFIK (CHART.JS)
+    // -------------------------------------------------------------
+    fetch('/dashboard/api/stats/')
+        .then(response => response.json())
+        .then(data => {
+            console.log("Data JSON Berhasil Diterima:", data); // Validasi untuk Screenshot No. 6
+
+            // Pemetaan Grafik Batang Kategori
+            const catLabels = Object.keys(data.category_distribution);
+            const catValues = Object.values(data.category_distribution);
+            
+            new Chart(document.getElementById('categoryChart'), {
+                type: 'bar',
+                data: {
+                    labels: catLabels,
+                    datasets: [{
+                        label: 'Jumlah Kasus Laporan',
+                        data: catValues,
+                        backgroundColor: '#0d6efd',
+                        borderRadius: 5
+                    }]
+                },
+                options: { responsive: true, scales: { y: { beginAtZero: true } } }
+            });
+
+            // Pemetaan Grafik Donat Status
+            const statusLabels = Object.keys(data.status_distribution);
+            const statusValues = Object.values(data.status_distribution);
+            
+            new Chart(document.getElementById('statusChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: statusLabels,
+                    datasets: [{
+                        data: statusValues,
+                        backgroundColor: ['#ffc107', '#0dcaf0', '#198754']
+                    }]
+                },
+                options: { responsive: true }
+            });
+
+            // Pengisian 5 Laporan Masuk Terbaru
+            const reportedList = document.getElementById('recentReportedList');
+            reportedList.innerHTML = data.recent_reported.length ? '' : '<li class="list-group-item text-center text-muted">Tidak ada data.</li>';
+            data.recent_reported.forEach(item => {
+                reportedList.innerHTML += `
+                    <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                        <div class="text-truncate me-2" style="max-width: 75%;">
+                            <div class="fw-bold text-dark text-truncate">${item.title}</div>
+                            <small class="text-muted">📍 ${item.location}</small>
+                        </div>
+                        <button class="btn btn-sm btn-outline-dark fw-bold btn-view-modal" data-id="${item.id}">Detail</button>
+                    </li>`;
+            });
+
+            // Pengisian 5 Laporan Selesai Terbaru
+            const resolvedList = document.getElementById('recentResolvedList');
+            resolvedList.innerHTML = data.recent_resolved.length ? '' : '<li class="list-group-item text-center text-muted">Tidak ada data.</li>';
+            data.recent_resolved.forEach(item => {
+                resolvedList.innerHTML += `
+                    <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                        <div class="text-truncate me-2" style="max-width: 75%;">
+                            <div class="fw-bold text-dark text-truncate">${item.title}</div>
+                            <small class="text-muted">📁 ${item.category}</small>
+                        </div>
+                        <button class="btn btn-sm btn-outline-dark fw-bold btn-view-modal" data-id="${item.id}">Detail</button>
+                    </li>`;
+            });
+        });
+
+    // -------------------------------------------------------------
+    // 2. FITUR LIVE SEARCH AMBIL DATA DARI BACKEND
+    // -------------------------------------------------------------
+    const searchInput = document.getElementById('searchInput');
+    const resultsTable = document.getElementById('searchResultsTable');
+
+    function jalankanPencarian(keyword = '') {
+        fetch(`/dashboard/api/search/?q=${encodeURIComponent(keyword)}`)
+            .then(response => response.json())
+            .then(data => {
+                resultsTable.innerHTML = '';
+                if (!data.reports.length) {
+                    resultsTable.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-muted">Data yang Anda cari tidak ditemukan.</td></tr>';
+                    return;
+                }
+                data.reports.forEach(item => {
+                    let badgeColor = item.status === 'Reported' ? 'bg-warning text-dark' : (item.status === 'Verified' ? 'bg-info text-white' : 'bg-success text-white');
+                    resultsTable.innerHTML += `
+                        <tr>
+                            <td class="ps-4 fw-bold text-dark">${item.title}</td>
+                            <td><span class="badge bg-light text-dark border">${item.category}</span></td>
+                            <td class="text-muted small text-truncate" style="max-width: 200px;">${item.location}</td>
+                            <td><span class="badge ${badgeColor} px-2.5 py-1.5 rounded-pill fw-bold">${item.status}</span></td>
+                            <td class="text-center pe-4">
+                                <button class="btn btn-sm btn-dark fw-bold btn-view-modal" data-id="${item.id}">Lihat Info</button>
+                            </td>
+                        </tr>`;
+                });
+            });
+    }
+
+    // Jalankan pencarian default saat pertama kali halaman dimuat
+    jalankanPencarian();
+
+    // Konsep Debouncing: Mencegah hit server berlebihan saat mengetik cepat
+    let searchTimeout;
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            jalankanPencarian(this.value);
+        }, 300); // Request dikirim hanya jika berhenti mengetik selama 300ms
+    });
+
+    // -------------------------------------------------------------
+    // 3. TEKNIK EVENT DELEGATION UNTUK TOMBOL POP-UP DETAIL MODAL
+    // -------------------------------------------------------------
+    const myModal = new bootstrap.Modal(document.getElementById('reportDetailModal'));
+    const modalBody = document.getElementById('modalBody');
+
+    document.addEventListener('click', function(e) {
+        if (e.target && e.target.classList.contains('btn-view-modal')) {
+            const idLaporan = e.target.getAttribute('data-id');
+            
+            // Set loading animasi spinner di dalam modal
+            modalBody.innerHTML = `<div class="text-center py-3"><div class="spinner-border text-dark"></div><p class="text-muted mt-2 mb-0">Mengambil data...</p></div>`;
+            myModal.show();
+
+            // Tarik detail data spesifik dari backend berdasarkan ID
+            fetch(`/dashboard/api/search/?id=${idLaporan}`)
+                .then(response => response.json())
+                .then(item => {
+                    let statusBadge = item.status === 'Reported' ? 'bg-warning text-dark' : (item.status === 'Verified' ? 'bg-info text-white' : 'bg-success text-white');
+                    modalBody.innerHTML = `
+                        <div class="mb-3">
+                            <label class="fw-bold text-secondary small text-uppercase">Judul Kendala</label>
+                            <h4 class="fw-bold text-dark">${item.title}</h4>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label class="fw-bold text-secondary small text-uppercase">Kategori</label>
+                                <div><span class="badge bg-light text-dark border px-2.5 py-1.5 fw-medium">📁 {{ report.category }}${item.category}</span></div>
+                            </div>
+                            <div class="col-6">
+                                <label class="fw-bold text-secondary small text-uppercase">Status Progres</label>
+                                <div><span class="badge ${statusBadge} px-2.5 py-1.5 fw-bold rounded-pill">${item.status}</span></div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="fw-bold text-secondary small text-uppercase">Lokasi Pelaporan</label>
+                            <p class="text-dark bg-light p-2.5 rounded border small mb-0">📍 ${item.location}</p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="fw-bold text-secondary small text-uppercase">Deskripsi Masalah Lengkap</label>
+                            <p class="text-dark bg-light p-3 rounded border small mb-0" style="white-space: pre-line;">${item.description}</p>
+                        </div>
+                        <div class="text-end text-muted small">
+                            📅 Diperbarui pada: <strong>${item.created_at}</strong>
+                        </div>`;
+                });
+        }
+    });
+});
+</script>
+{% endblock %}

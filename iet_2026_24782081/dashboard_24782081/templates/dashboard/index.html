@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart City - Dashboard Real-Time</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <nav class="bg-slate-900 text-white shadow-md sticky top-0 z-40 px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center space-x-3">
+            <div class="bg-blue-600 p-2 rounded-lg text-white">
+                <i class="fa-solid fa-city text-xl"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-lg tracking-wide">SMART CITY</h1>
+                <p class="text-xs text-slate-400">Sistem Monitoring Real-Time</p>
+            </div>
+        </div>
+        <div class="flex items-center space-x-6">
+            <a href="/" class="text-slate-300 hover:text-white transition font-medium text-sm">
+                <i class="fa-solid fa-house mr-1"></i> Utama
+            </a>
+            <div class="bg-slate-800 px-4 py-2 rounded-full flex items-center space-x-2 border border-slate-700">
+                <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                <span class="text-xs text-slate-300">Terhubung: <strong>Admin</strong></span>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        
+        <div class="bg-gradient-to-r from-blue-700 via-indigo-700 to-purple-800 rounded-2xl p-6 sm:p-8 text-white shadow-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+                <span class="bg-blue-500/30 text-blue-200 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider border border-blue-400/20">Lab 7 Dashboard</span>
+                <h2 class="text-2xl sm:text-3xl font-extrabold mt-2 tracking-tight">Visualisasi Data & Monitoring Aspirasi</h2>
+                <p class="text-blue-100/80 text-sm sm:text-base mt-1 max-w-2xl">Menganalisis tumpukan data laporan infrastruktur, keamanan, dan sanitasi secara dinamis tanpa muat ulang halaman.</p>
+            </div>
+            <div class="bg-white/10 backdrop-blur-md px-4 py-3 rounded-xl border border-white/10 flex items-center space-x-3 self-stretch md:self-auto justify-center">
+                <i class="fa-solid fa-chart-line text-2xl text-blue-300"></i>
+                <div class="text-right">
+                    <p class="text-xs text-blue-200">Total Basis Data</p>
+                    <p class="text-lg font-bold">1,000 Laporan</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col">
+                <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-3">
+                    <h3 class="font-bold text-slate-900 flex items-center"><i class="fa-solid fa-tags text-blue-600 mr-2"></i>Distribusi Kategori Laporan</h3>
+                    <span class="text-xs text-slate-400 bg-slate-50 px-2.5 py-1 rounded-md">Grafik Batang</span>
+                </div>
+                <div class="relative flex-1 min-h-[300px] flex items-center justify-center">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col">
+                <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-3">
+                    <h3 class="font-bold text-slate-900 flex items-center"><i class="fa-solid fa-list-check text-indigo-600 mr-2"></i>Status Penanganan Isu</h3>
+                    <span class="text-xs text-slate-400 bg-slate-50 px-2.5 py-1 rounded-md">Grafik Doughnut</span>
+                </div>
+                <div class="relative flex-1 min-h-[300px] max-h-[320px] flex items-center justify-center">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                <div class="bg-amber-50/50 px-6 py-4 border-b border-amber-100 flex items-center justify-between">
+                    <h3 class="font-bold text-amber-900 flex items-center"><i class="fa-solid fa-triangle-exclamation mr-2 text-amber-600"></i>5 Laporan Baru Masuk (REPORTED)</h3>
+                    <span class="bg-amber-100 text-amber-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Menunggu</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-slate-50 text-slate-500 uppercase text-xs font-semibold border-b border-slate-100">
+                            <tr>
+                                <th class="px-6 py-3">Judul Kendala</th>
+                                <th class="px-6 py-3">Kategori</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reportedTableBody" class="divide-y divide-slate-100 text-sm">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                <div class="bg-emerald-50/50 px-6 py-4 border-b border-emerald-100 flex items-center justify-between">
+                    <h3 class="font-bold text-emerald-900 flex items-center"><i class="fa-solid fa-circle-check mr-2 text-emerald-600"></i>5 Laporan Terakhir Selesai (RESOLVED)</h3>
+                    <span class="bg-emerald-100 text-emerald-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Selesai</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-slate-50 text-slate-500 uppercase text-xs font-semibold border-b border-slate-100">
+                            <tr>
+                                <th class="px-6 py-3">Judul Kendala</th>
+                                <th class="px-6 py-3">Kategori</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resolvedTableBody" class="divide-y divide-slate-100 text-sm">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-100 space-y-6">
+            <div class="sm:flex sm:items-center sm:justify-between border-b border-slate-100 pb-4">
+                <div>
+                    <h3 class="text-xl font-bold text-slate-900 flex items-center"><i class="fa-solid fa-magnifying-glass text-blue-600 mr-2"></i>Eksplorasi Laporan Instan</h3>
+                    <p class="text-sm text-slate-500 mt-1">Gunakan fitur Live Search tanpa muat ulang halaman untuk menyaring 1.000 data seed.</p>
+                </div>
+                <div class="mt-4 sm:mt-0 relative w-full sm:w-80">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-search"></i>
+                    </span>
+                    <input type="text" id="searchInput" placeholder="Cari judul, lokasi atau kategori..." 
+                        class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition">
+                </div>
+            </div>
+
+            <div class="overflow-x-auto rounded-xl border border-slate-100">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-slate-50 text-slate-600 uppercase text-xs font-bold border-b border-slate-100">
+                        <tr>
+                            <th class="px-6 py-4">Judul Kendala</th>
+                            <th class="px-6 py-4">Kategori</th>
+                            <th class="px-6 py-4">Status Progres</th>
+                            <th class="px-6 py-4 text-center">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="searchResultsBody" class="divide-y divide-slate-100 text-sm text-slate-700">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <div id="detailModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 transition-all duration-300">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-xl w-full transform scale-95 opacity-0 transition-all duration-300 overflow-hidden flex flex-col" id="modalContainer">
+            <div class="bg-slate-900 px-6 py-4 text-white flex justify-between items-center">
+                <h4 class="font-bold text-lg flex items-center"><i class="fa-solid fa-circle-info text-blue-400 mr-2"></i>Rincian Validasi Laporan</h4>
+                <button id="closeModalBtn" class="text-slate-400 hover:text-white transition text-xl cursor-pointer focus:outline-none">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-4 overflow-y-auto max-h-[70vh]">
+                <div>
+                    <span id="modalCategory" class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-1 rounded-md uppercase"></span>
+                    <h3 id="modalTitle" class="text-xl font-bold text-slate-950 mt-2"></h3>
+                </div>
+                <hr class="border-slate-100">
+                <div class="space-y-3">
+                    <div class="flex items-start space-x-3">
+                        <i class="fa-solid fa-align-left text-slate-400 mt-1"></i>
+                        <div>
+                            <p class="text-xs text-slate-400 font-semibold uppercase">Deskripsi Masalah</p>
+                            <p id="modalDescription" class="text-sm text-slate-600 mt-0.5 leading-relaxed"></p>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <i class="fa-solid fa-location-dot text-red-500 mt-1"></i>
+                        <div>
+                            <p class="text-xs text-slate-400 font-semibold uppercase">Lokasi Kejadian</p>
+                            <p id="modalLocation" class="text-sm text-slate-600 mt-0.5"></p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-traffic-light text-slate-400"></i>
+                        <div>
+                            <p class="text-xs text-slate-400 font-semibold uppercase">Status Pemeriksaan</p>
+                            <span id="modalStatus" class="inline-block mt-1 px-3 py-1 text-xs font-extrabold rounded-full"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-slate-50 px-6 py-4 border-t border-slate-100 flex justify-end">
+                <button id="closeModalFooterBtn" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium text-sm px-5 py-2.5 rounded-xl transition cursor-pointer">
+                    Tutup Detail
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Inisialisasi Grafik & Komponen Data Ringkasan Utama
+            initDashboardStats();
+            
+            // Inisialisasi Fitur Live Search Default
+            liveSearch('');
+
+            // Handler untuk input ketik Live Search (Debouncing Sederhana)
+            let searchTimeout;
+            document.getElementById('searchInput').addEventListener('input', function(e) {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    liveSearch(e.target.value);
+                }, 300); // Trigger request 300ms setelah user berhenti mengetik
+            });
+
+            // Event Delegation untuk mendeteksi Klik tombol detail (Wajib untuk Element Dinamis)
+            document.getElementById('searchResultsBody').addEventListener('click', function(e) {
+                const button = e.target.closest('.view-detail-btn');
+                if (button) {
+                    const reportId = button.getAttribute('data-id');
+                    openDetailModal(reportId);
+                }
+            });
+
+            // Penutup Jendela Modal Event Listener
+            document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+            document.getElementById('closeModalFooterBtn').addEventListener('click', closeModal);
+            document.getElementById('detailModal').addEventListener('click', function(e) {
+                if(e.target === this) closeModal();
+            });
+        });
+
+        // --- Fungsi Fungsi Core Fetch ---
+
+        function initDashboardStats() {
+            fetch('/dashboard/api/stats/')
+                .then(response => response.json())
+                .then(data => {
+                    // Render Bar Chart untuk Distribusi Kategori
+                    const catCtx = document.getElementById('categoryChart').getContext('2d');
+                    new Chart(catCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: Object.keys(data.category_distribution),
+                            datasets: [{
+                                label: 'Jumlah Pengaduan',
+                                data: Object.values(data.category_distribution),
+                                backgroundColor: ['#3b82f6', '#6366f1', '#f59e0b', '#10b981', '#ec4899'],
+                                borderRadius: 8
+                            }]
+                        },
+                        options: { responsive: true, maintainAspectRatio: false }
+                    });
+
+                    // Render Doughnut Chart untuk Distribusi Status
+                    const statusCtx = document.getElementById('statusChart').getContext('2d');
+                    new Chart(statusCtx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: Object.keys(data.status_distribution),
+                            datasets: [{
+                                data: Object.values(data.status_distribution),
+                                backgroundColor: ['#ef4444', '#f59e0b', '#3b82f6', '#10b981']
+                            }]
+                        },
+                        options: { responsive: true, maintainAspectRatio: false }
+                    });
+
+                    // Isi Tabel 5 Laporan Reported
+                    fillTable('reportedTableBody', data.recent_reported);
+                    // Isi Tabel 5 Laporan Resolved
+                    fillTable('resolvedTableBody', data.recent_resolved);
+                });
+        }
+
+        function fillTable(tableId, listData) {
+            const body = document.getElementById(tableId);
+            body.innerHTML = listData.map(item => `
+                <tr class="hover:bg-slate-50 transition">
+                    <td class="px-6 py-3 font-medium text-slate-900">${item.title}</td>
+                    <td class="px-6 py-3"><span class="bg-slate-100 text-slate-600 text-xs px-2.5 py-0.5 rounded-full">${item.category}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        function liveSearch(query) {
+            fetch(`/dashboard/api/search/?q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    const tbody = document.getElementById('searchResultsBody');
+                    if(data.reports.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="4" class="px-6 py-8 text-center text-slate-400"><i class="fa-regular fa-folder-open text-2xl block mb-2"></i>Tidak ada laporan yang cocok</td></tr>`;
+                        return;
+                    }
+
+                    tbody.innerHTML = data.reports.map(r => {
+                        let badgeColor = 'bg-slate-100 text-slate-800';
+                        if(r.status === 'Reported' || r.status === 'DILAPORKAN') badgeColor = 'bg-red-100 text-red-700';
+                        else if(r.status === 'In Progress' || r.status === 'PROSES') badgeColor = 'bg-blue-100 text-blue-700';
+                        else if(r.status === 'Resolved' || r.status === 'SELESAI') badgeColor = 'bg-emerald-100 text-emerald-700';
+
+                        return `
+                            <tr class="hover:bg-slate-50/80 transition">
+                                <td class="px-6 py-4 font-semibold text-slate-900">${r.title}<p class="text-xs text-slate-400 font-normal mt-0.5"><i class="fa-solid fa-location-dot mr-1 text-red-400"></i>${r.location}</p></td>
+                                <td class="px-6 py-4"><span class="bg-slate-100 text-slate-600 text-xs px-2.5 py-1 rounded-md font-medium">${r.category}</span></td>
+                                <td class="px-6 py-4"><span class="${badgeColor} text-xs font-bold px-2.5 py-1 rounded-full">${r.status}</span></td>
+                                <td class="px-6 py-4 text-center">
+                                    <button data-id="${r.id}" class="view-detail-btn bg-slate-900 hover:bg-blue-600 text-white text-xs font-medium px-3.5 py-2 rounded-xl transition shadow-sm flex items-center mx-auto cursor-pointer">
+                                        <i class="fa-regular fa-eye mr-1.5"></i> Detail
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+                });
+        }
+
+        function openDetailModal(id) {
+            fetch(`/dashboard/api/search/?id=${id}`)
+                .then(response => response.json())
+                .then(r => {
+                    document.getElementById('modalCategory').innerText = r.category;
+                    document.getElementById('modalTitle').innerText = r.title;
+                    document.getElementById('modalDescription').innerText = r.description;
+                    document.getElementById('modalLocation').innerText = r.location;
+                    
+                    const statusSpan = document.getElementById('modalStatus');
+                    statusSpan.innerText = r.status;
+                    statusSpan.className = "inline-block mt-1 px-3 py-1 text-xs font-extrabold rounded-full";
+                    
+                    if(r.status.toLowerCase().includes('report')) statusSpan.classList.add('bg-red-100', 'text-red-700');
+                    else if(r.status.toLowerCase().includes('progress')) statusSpan.classList.add('bg-blue-100', 'text-blue-700');
+                    else statusSpan.classList.add('bg-emerald-100', 'text-emerald-700');
+
+                    // Tampilkan Modal dengan animasi lembut
+                    const modal = document.getElementById('detailModal');
+                    const container = document.getElementById('modalContainer');
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+                    setTimeout(() => {
+                        container.classList.remove('scale-95', 'opacity-0');
+                        container.classList.add('scale-100', 'opacity-100');
+                    }, 50);
+                });
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('detailModal');
+            const container = document.getElementById('modalContainer');
+            container.classList.remove('scale-100', 'opacity-100');
+            container.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.remove('flex');
+                modal.classList.add('hidden');
+            }, 200);
+        }
+    </script>
+</body>
+</html>
